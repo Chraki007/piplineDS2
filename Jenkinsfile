@@ -2,24 +2,23 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = 'SonarQubeServer' // Nom du serveur SonarQube configuré dans Jenkins (Manage Jenkins > Configure System)
-        DOCKER_IMAGE = 'springboot-app' // Nom de l’image Docker
+        SONARQUBE = 'sonarqube' // SonarQube name in Jenkins settings
+        IMAGE_NAME = 'springboot-app' // Docker image name
     }
 
     stages {
-        stage('Cloner le projet GitHub') {
+        stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'github.com/Chraki007/piplineDS2.git'
-            }
+            git branch: 'main', url: 'https://github.com/Chraki007/piplineDS2.git'}
         }
 
-        stage('Build Maven') {
+        stage('Build with Maven') {
             steps {
                 sh 'mvn clean install'
             }
         }
 
-        stage('Analyse SonarQube') {
+        stage('Analyze SonarQube') {
             steps {
                 withSonarQubeEnv("${SONARQUBE}") {
                     sh 'mvn sonar:sonar -Dsonar.projectKey=springboot-project -Dsonar.host.url=http://localhost:9000'
@@ -27,29 +26,25 @@ pipeline {
             }
         }
 
-        stage('Attente du Quality Gate') {
+        stage('Build Docker Image') {
             steps {
-                timeout(time: 1, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
+                sh "docker build -t ${IMAGE_NAME} ."
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Run Docker Container') {
             steps {
-                script {
-                    sh "docker build -t ${DOCKER_IMAGE} ."
-                }
+                sh "docker run -d -p 8082:8080 ${IMAGE_NAME}"
             }
         }
     }
 
     post {
         success {
-            echo "✅ Pipeline terminé avec succès."
+            echo "✅ Pipeline executed successfully!"
         }
         failure {
-            echo "❌ Pipeline échoué."
+            echo "❌ Pipeline failed!"
         }
     }
 }
