@@ -2,14 +2,16 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = 'sonarqube' // SonarQube name in Jenkins settings
+        SONARQUBE = 'sonarqube' // Ensure this matches your configured SonarQube instance in Jenkins
         IMAGE_NAME = 'springboot-app' // Docker image name
+        APP_PORT = '8082' // Port for the application
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-            git branch: 'main', url: 'https://github.com/Chraki007/piplineDS2.git'}
+                git branch: 'main', url: 'https://github.com/Chraki007/piplineDS2.git'
+            }
         }
 
         stage('Build with Maven') {
@@ -34,7 +36,7 @@ pipeline {
 
         stage('Run Docker Container') {
             steps {
-                sh "docker run -d -p 8082:8080 ${IMAGE_NAME}"
+                sh "docker run -d -p ${APP_PORT}:8080 ${IMAGE_NAME}"
             }
         }
     }
