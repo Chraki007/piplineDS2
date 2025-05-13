@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = 'sonarqube' // Ensure this matches your configured SonarQube instance in Jenkins
+        SONARQUBE = 'sonarqube' // SonarQube name in Jenkins settings
         IMAGE_NAME = 'springboot-app' // Docker image name
-        APP_PORT = '8082' // Port for the application
     }
 
     stages {
@@ -36,7 +35,7 @@ pipeline {
 
         stage('Run Docker Container') {
             steps {
-                sh "docker run -d -p ${APP_PORT}:8080 ${IMAGE_NAME}"
+                sh "docker run -d -p 8082:8080 ${IMAGE_NAME}"
             }
         }
     }
